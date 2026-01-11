@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>House of Paradox | Smart Coffee Stall</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--coffee:#2b1b17;--cream:#f4efe9}
+body{font-family:'Segoe UI',Arial;background:var(--cream);margin:0}
+header{background:var(--coffee);color:#fff;padding:18px;text-align:center}
+header h1{margin:0;font-size:26px}
+header p{margin:4px 0 0;font-size:14px;opacity:.9}
+section{max-width:1000px;margin:auto;padding:15px}
+.card{background:#fff;padding:18px;margin-bottom:16px;border-radius:14px;box-shadow:0 6px 14px rgba(0,0,0,.1)}
+h3{margin-top:0;color:var(--coffee)}
+input,select,button{width:100%;padding:10px;margin-top:10px;border-radius:8px;border:1px solid #ccc;font-size:15px}
+button{background:var(--coffee);color:#fff;border:none;font-weight:600;cursor:pointer}
+button.alt{background:#555}
+button.warn{background:#b02a2a}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border-bottom:1px solid #ddd;padding:8px;text-align:center}
+th{background:#fafafa}
+.total{font-size:20px;font-weight:700;margin-top:8px}
+.badge{display:inline-block;padding:4px 10px;border-radius:20px;background:#eee;font-size:13px}
+@media print{button,input,select,#qr,header{display:none}.card{box-shadow:none}}
+</style>
+</head>
+<body>
+<header>
+<h1>☕ House of Paradox</h1>
+<p>Premium Event Coffee Experience</p>
+</header>
+
+<section>
+<div class="grid">
+<!-- QR -->
+<div class="card">
+<h3>📱 Scan & Order</h3>
+<div id="qr"></div>
+<p class="badge">Customer Self‑Order</p>
+</div>
+
+<!-- ORDER -->
+<div class="card">
+<h3>Place Order</h3>
+<input id="name" placeholder="Customer name" />
+<select id="coffee" onchange="autoPrice()">
+<option value="">Select coffee</option>
+<option value="Espresso">Espresso</option>
+<option value="Latte">Latte</option>
+<option value="Cappuccino">Cappuccino</option>
+<option value="Cold Brew">Cold Brew</option>
+<option value="Frappe">Frappe</option>
+</select>
+<input id="price" type="number" placeholder="Amount (₹)" />
+<button onclick="addOrder()">Add Order</button>
+</div>
+
+<!-- SUMMARY -->
+<div class="card">
+<h3>📊 Live Summary</h3>
+<div class="total">Sales: ₹<span id="sales">0</span></div>
+<div class="total">Expense: ₹<span id="expense">0</span></div>
+<div class="total">Profit: ₹<span id="profit">0</span></div>
+<button onclick="window.print()">🧾 Print Receipt</button>
+</div>
+</div>
+
+<!-- TABLE -->
+<div class="card">
+<h3>Orders List</h3>
+<table id="orderTable"><tr><th>#</th><th>Name</th><th>Coffee</th><th>₹</th></tr></table>
+</div>
+
+<div class="grid">
+<!-- EXPENSE -->
+<div class="card">
+<h3>Add Expense</h3>
+<input id="reason" placeholder="Expense reason" />
+<input id="expAmount" type="number" placeholder="Amount (₹)" />
+<button class="alt" onclick="addExpense()">Add Expense</button>
+</div>
+
+<!-- CONTROL -->
+<div class="card">
+<h3>Day Control</h3>
+<button class="warn" onclick="endDay()">🔒 End Day & Reset</button>
+<p class="badge">Auto‑saved</p>
+</div>
+</div>
+</section>
+
+<script>
+let prices={Espresso:80,Latte:120,Cappuccino:110,'Cold Brew':140,Frappe:150};
+let totalSales=Number(localStorage.getItem('sales'))||0;
+let totalExpense=Number(localStorage.getItem('expense'))||0;
+let count=0;
+
+sales.innerText=totalSales;
+expense.innerText=totalExpense;
+profit.innerText=totalSales-totalExpense;
+
+function autoPrice(){ price.value=prices[coffee.value]||''; }
+
+function addOrder(){
+ let n=name.value,c=coffee.value,p=Number(price.value);
+ if(!n||!c||!p) return alert('Fill all fields');
+ let r=orderTable.insertRow();
+ r.insertCell(0).innerText=++count;
+ r.insertCell(1).innerText=n;
+ r.insertCell(2).innerText=c;
+ r.insertCell(3).innerText=p;
+ totalSales+=p; localStorage.setItem('sales',totalSales);
+ sales.innerText=totalSales; calc(); name.value=price.value=''; coffee.value='';
+}
+
+function addExpense(){
+ let r=reason.value,a=Number(expAmount.value);
+ if(!r||!a) return alert('Fill all fields');
+ totalExpense+=a; localStorage.setItem('expense',totalExpense);
+ expense.innerText=totalExpense; calc(); reason.value=expAmount.value='';
+}
+
+function calc(){ profit.innerText=totalSales-totalExpense; }
+
+function endDay(){ if(confirm('End event day?')){ localStorage.clear(); location.reload(); }}
+
+new QRCode(document.getElementById('qr'), window.location.href);
+</script>
+</body>
+</html>
